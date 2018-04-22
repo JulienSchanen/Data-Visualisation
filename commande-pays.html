@@ -1,0 +1,198 @@
+<!doctype html>
+<html>
+<head>
+<title>D3 Bar Chart</title>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+</head>
+<body>
+ 
+
+ 
+<svg class="chart"></svg>
+
+
+ 
+<style>
+ 
+
+ 
+.axis text {
+font: 10px sans-serif;
+}
+ 
+.axis path,
+.axis line {
+fill: none;
+stroke: #000;
+shape-rendering: crispEdges;
+}
+ 
+.x.axis path {
+display: none;
+}
+ 
+rect {
+-moz-transition: all 0.3s;
+-o-transition: all 0.3s;
+-webkit-transition: all 0.3s;
+transition: all 0.5s;
+cursor:pointer;
+}
+.bar:hover {
+  fill: orange ;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.toolTip :after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1; 
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.toolTip :after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+} 
+
+.toolTip {
+  position: absolute;
+  display: none;
+  min-width: 80px;
+  height: auto;
+  text-align: center;
+    line-height: 1;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+}
+</style>
+ 
+<script>
+var tooltip = d3.select("body").append("div").attr("class", "toolTip"); 
+var margin = {top: 20, right: 30, bottom: 30, left: 70},
+width = 960 - margin.left - margin.right,
+height = 400 - margin.top - margin.bottom;
+ 
+var x = d3.scale.ordinal()
+.rangeRoundBands([0, width], .1);
+ 
+var y = d3.scale.linear()
+.range([height, 0]);
+ 
+var xAxis = d3.svg.axis()
+.scale(x)
+.orient("bottom");
+ 
+var yAxis = d3.svg.axis()
+.scale(y)
+.orient("left");
+
+
+var chart = d3.select(".chart")
+.attr("width", width + margin.left + margin.right)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong>Total CA:</strong> <span style='color:red'>" + d.total + "</span>";
+  })
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.call(tip); 
+
+var data;
+ 
+d3.json("montant-commande-pays.php", function(error, json) {
+ 
+if (error) return console.warn(error);
+ 
+data = json;
+ 
+x.domain(data.map(function(d) { return d.pays; }));
+ 
+y.domain([0, d3.max(data, function(d) { return +d.total; })]);
+
+chart.append("g")
+.attr("class", "x axis")
+.attr("transform", "translate(0," + height + ")")
+.call(xAxis);
+ 
+chart.append("g")
+.attr("class", "y axis")
+.call(yAxis);
+ 
+ 
+chart.selectAll(".bar")
+.data(data)
+.enter()
+.append("rect")
+.attr("class", "bar")
+.attr("x", function(d) { return x(d.pays); })
+.attr("y", function(d) { return y(+d.total); })
+.attr("height", function(d) { return height - y(+d.total); })
+.attr("width", x.rangeBand())
+.attr("fill", function(d) { return "rgb(100,10, 100)"; })
+        .on("mousemove", function(d){
+            tooltip
+              .style("left", d3.event.pageX - 150 + "px")
+              .style("top", d3.event.pageY - 70 + "px")
+              .style("display", "inline-block")
+              .html("<strong>Pays:</strong> <span style='color:white'>" + d.pays + "</span> <br><strong>Total:</strong> <span style='color:red'>" + d.total + "</span>");
+        })
+    		.on("mouseout", function(d){ tooltip.style("display", "none");})
+   // text label for the y axis
+  chart.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x",0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Panier Moyen");
+      
+  // text label for the x axis
+  svg.append("text")             
+      .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 20) + ")")
+      .style("text-anchor", "middle")
+      .text("Date");
+});
+
+
+
+ 
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Commandes par pays avec echarts3</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script src="echarts.js"></script>
+    </head>
+    <body>
+        <div id="main"></div>
+        <style>body {
+                background-color: #fff;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 16px; 
+                color: #000;
+            }
+
+            a:link, a:visited {
+                color: #4682b4;
+            }
+
+            a:hover {
+                color: #4169e1;
+            }
+
+            #main	{
+                width: 1000px;
+                height: 700px;
+            }</style>
+        <div id="zone"></div>
+        <script>
+            var chart = echarts.init(document.getElementById('main'));
+            chart.showLoading();
+            
+            //$.getJSON('montantcommande.php',function(data){ var myString = JSON.stringify(data);alert(myString); })
+            $.getJSON('montantcommande.php', function (montantpays) {
+// index attribue un numero a chaque itérations
+                $.each(montantpays, function (index, d) {
+                    pays = [d.pays];
+                    console.log(pays[0]);
+                    total = [d.total];
+                    // alert(d.pays.length);
+                    //for (var index = 0; index < d.pays.length; index++) {
+                    //     pays=d.pays[index];
+                    //    ;
+                    // }
+                    $('#zone').append(pays);
+                    $('#zone').append(total);
+
+                    // for (var i = 0; i < d.total.length; i++) {
+                    //     total.push(d.total[i]);
+                    //     ;
+                    // }
+                    // total.push(d.total);
+                    chart.hideLoading();
+                    option = {
+                        title: {
+                            text: 'Montant commandes par Pays'
+                        },
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: {
+                                type: 'shadow',
+                                label: {
+                                    show: true
+                                }
+                            }
+                        },
+                        legend: {
+                            data: ['total']
+                        },
+                        xAxis: {
+                            data: montantpays[0].pays
+                        },
+                        yAxis: {},
+                        series: [{
+                                name: 'total',
+                                type: 'bar',
+                                data: montantpays[0].total
+                            }]
+                    };
+                });
+                chart.setOption(option);
+            });
+
+        </script>
+    </body>
+</html>
